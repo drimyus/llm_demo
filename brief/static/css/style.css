@@ -1,0 +1,37 @@
+/* Collabstr-adjacent light theme, using variables from downloaded base.css */
+:root{
+  --black:#222;
+  --lightGray:rgb(151,163,197);
+  --lightBoxShadow:rgba(120,120,170,0.15) 0 2px 16px 0;
+  --mediumBoxShadow:rgba(120,120,170,0.2) 0 2px 10px 0;
+  --collabstrDark:#FF899B;
+  --gradientText:linear-gradient(90deg, rgb(255 132 160) 0%, rgb(251 102 157) 20%, rgb(179 45 194) 95%, rgb(136, 95, 183) 100%);
+  --border:rgba(191,203,218,.9);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f8fbff;color:var(--black);font:16px/1.55 'Inter',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.container{max-width:980px;margin:0 auto;padding:24px}
+.navbar{background:#fff;border-bottom:1px solid #eef2f7}
+.brand{font-weight:700;letter-spacing:.2px}
+.card{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:24px;margin:24px 0;box-shadow:var(--lightBoxShadow)}
+.card h1,.card h2,.card h3{margin:0 0 12px}
+.sub{color:var(--lightGray);margin-top:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column}
+label{font-weight:600;margin-bottom:6px}
+input,select{background:#fff;color:var(--black);border:1px solid var(--border);border-radius:8px;padding:12px 12px;outline:none}
+input::placeholder{color:#a6a6a6}
+input:focus,select:focus{border-color:#8d99a8}
+.form-actions{grid-column:1 / -1;display:flex;align-items:center;gap:12px}
+.btn-primary{background:var(--collabstrDark);background-image:var(--gradientText);color:#fff;border:none;padding:12px 18px;font-weight:700;border-radius:10px;cursor:pointer;box-shadow:var(--mediumBoxShadow)}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed}
+.loading{color:var(--lightGray)}
+.hidden{display:none}
+#result .brief{margin:8px 0 16px}
+#angles-list{padding-left:18px}
+#criteria-list{padding-left:18px}
+.metrics{color:var(--lightGray);margin-top:12px;font-size:14px}
+.error{border-color:#ffd0d0;background:#fff2f2;color:#8a1f1f}
+.footer{color:var(--lightGray);text-align:center;margin-bottom:32px}
+@media (max-width:720px){.grid{grid-template-columns:1fr}}

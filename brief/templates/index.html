@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collabstr AI Brief Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/vendor/collabstr/base.css" />
+  <link rel="stylesheet" href="/static/vendor/collabstr/header.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header class="navbar header">
+    <div class="header-row">
+      <div class="brand">Collabstr — AI Brief Generator</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h1>Create a Campaign Brief</h1>
+      <p class="sub">Generate a concise influencer campaign brief in seconds.</p>
+      <form id="brief-form" class="grid">
+        <div class="form-group">
+          <label for="brand">Brand name</label>
+          <input id="brand" name="brand" type="text" placeholder="e.g., Acme Skincare" required />
+        </div>
+
+        <div class="form-group">
+          <label for="platform">Target platform</label>
+          <select id="platform" name="platform">
+            <option>Instagram</option>
+            <option>TikTok</option>
+            <option>UGC</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="goal">Goal</label>
+          <select id="goal" name="goal">
+            <option>Awareness</option>
+            <option>Conversions</option>
+            <option>Content Assets</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tone">Tone</label>
+          <select id="tone" name="tone">
+            <option>Professional</option>
+            <option>Friendly</option>
+            <option>Playful</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button id="submit" type="submit" class="btn-primary">Generate</button>
+          <span id="loading" class="loading hidden">Generating…</span>
+        </div>
+      </form>
+    </section>
+
+    <section id="result" class="card hidden">
+      <h2>Brief</h2>
+      <p id="brief-text" class="brief"></p>
+
+      <h3>Content Angles</h3>
+      <ol id="angles-list"></ol>
+
+      <h3>Creator Selection Criteria</h3>
+      <ul id="criteria-list"></ul>
+
+      <div id="metrics" class="metrics"></div>
+    </section>
+
+    <section id="error" class="card error hidden"></section>
+  </main>
+
+ 
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

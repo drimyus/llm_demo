@@ -1,0 +1,16 @@
+[project]
+name = "llm-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel>=7.0.1",
+    "langchain-ollama>=1.0.0",
+    "langchain[antropic]>=1.0.0",
+    "langgraph>=1.0.0",
+    "python-dotenv>=1.1.1",
+    "Django>=5.0.0",
+    "openai>=1.51.0",
+    "django-ratelimit>=4.1.0",
+]
