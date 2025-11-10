@@ -1,10 +1,11 @@
 import json
 import time
+import os
 from dataclasses import dataclass
 from typing import List, Dict
 
 from django.conf import settings
-from langchain_ollama import ChatOllama
+from groq import Groq
 
 
 SYSTEM_PROMPT = (
@@ -36,27 +37,33 @@ def build_user_prompt(brand: str, platform: str, goal: str, tone: str) -> str:
     )
 
 
-def _ollama() -> ChatOllama:
-    model = getattr(settings, 'OLLAMA_MODEL', 'phi3')
-    base_url = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
-    # Pass options directly to the ChatOllama constructor (avoids passing unsupported kwargs)
-    return ChatOllama(model=model, base_url=base_url, temperature=0.3, num_predict=500)
+def _groq_client() -> Groq:
+    api_key = getattr(settings, 'GROQ_API_KEY', None) or os.getenv('GROQ_API_KEY')
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY is not set")
+    return Groq(api_key=api_key)
 
 
 def generate_brief(brand: str, platform: str, goal: str, tone: str) -> BriefResult:
     start = time.perf_counter()
-
-    llm = _ollama()
-    prompt = (
-        f"System:\n{SYSTEM_PROMPT}\n\n"
-        f"User:\n{build_user_prompt(brand, platform, goal, tone)}\n\n"
-        "Only output valid JSON with keys: brief, angles, criteria."
+    client = _groq_client()
+    model = getattr(settings, 'GROQ_MODEL', os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant'))
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {
+            "role": "user",
+            "content": f"{build_user_prompt(brand, platform, goal, tone)}\n\nOnly output valid JSON with keys: brief, angles, criteria.",
+        },
+    ]
+    resp = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=0.3,
+        max_tokens=500,
     )
-    # Invoke and capture text
-    reply = llm.invoke(prompt)
     latency_ms = int((time.perf_counter() - start) * 1000)
 
-    content = getattr(reply, 'content', '') or ''
+    content = (resp.choices[0].message.content or '') if resp and resp.choices else ''
 
     def _strip_code_fences(txt: str) -> str:
         t = (txt or '').strip()
@@ -93,8 +100,13 @@ def generate_brief(brand: str, platform: str, goal: str, tone: str) -> BriefResu
     angles = [str(x).strip() for x in (data.get('angles') or [])][:3]
     criteria = [str(x).strip() for x in (data.get('criteria') or [])][:3]
 
-    # Ollama via LangChain doesn't consistently expose token usage; set zeros
-    usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    # Token usage from Groq
+    u = getattr(resp, 'usage', None)
+    usage = {
+        "prompt_tokens": getattr(u, 'prompt_tokens', 0) if u else 0,
+        "completion_tokens": getattr(u, 'completion_tokens', 0) if u else 0,
+        "total_tokens": getattr(u, 'total_tokens', 0) if u else 0,
+    }
 
     return BriefResult(
         brief=brief,

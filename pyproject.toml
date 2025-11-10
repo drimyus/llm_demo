@@ -1,12 +1,15 @@
 [project]
-name = "llm-agent"
+name = "llm-demo"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "langchain-ollama>=1.0.0",
-    "python-dotenv>=1.1.1",
-    "Django>=5.0.0",
-    "django-ratelimit>=4.1.0",
+    "Django==5.2.8",
+    "gunicorn>=21.2.0",
+    "whitenoise>=6.6.0",
+    "dj-database-url>=2.2.0",
+    "psycopg[binary]>=3.1.19",
+    "python-dotenv>=1.0.1",
+    "groq>=0.11.0"
 ]

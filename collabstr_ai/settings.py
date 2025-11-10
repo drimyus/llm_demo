@@ -1,11 +1,15 @@
 import os
 from pathlib import Path
+import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Load environment variables from .env (for local dev). On Render, env vars are injected.
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key')
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = [h for h in os.getenv('ALLOWED_HOSTS', '.onrender.com').split(',') if h]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -19,6 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -45,17 +50,16 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'collabstr_ai.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'brief' / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Security / proxy (Render)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = [
+    *[o for o in os.getenv('CSRF_TRUSTED_ORIGINS', 'https://*.onrender.com').split(',') if o]
+]
 
 # Ollama
 OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'phi3')
