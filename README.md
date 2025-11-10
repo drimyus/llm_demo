@@ -5,6 +5,9 @@ A minimal Django app that generates a short influencer campaign brief using a ho
 ## Screenshot
 ![AI Brief Generator UI](docs/screenshot.png)
 
+## Demo
+- Loom (under 1 minute): https://www.loom.com/share/0927157d1c154456b6e7bb7d44b75f64
+
 ## Tech Stack
 - **Backend**: Django 5
 - **LLM**: Groq API (`GROQ_MODEL` default: `llama-3.1-8b-instant`)
@@ -70,19 +73,20 @@ A minimal Django app that generates a short influencer campaign brief using a ho
   ```
 
 ## Prompt Design Choices
-- **System prompt** (`brief/services/llm.py::SYSTEM_PROMPT`):
-  - Enforces: 4–6 sentence concise brief; then 3 content angles; then 3 creator criteria.
-  - “Avoid fluff; tailor to inputs.”
-- **User prompt**: compact, built from the four inputs; requests a single JSON object with `brief`, `angles`, `criteria`.
-- **Determinism**: temperature set to 0.3 and output constrained to JSON; angles/criteria clamped to three items server‑side for stability.
+- **Role and goals**: Acts as an expert strategist/copywriter; invents a plausible product if brand is ambiguous; professional/strategic tone.
+- **Brief paragraph**: Single 4–6 sentence paragraph starting with “Here is the campaign brief for [Brand Name].” Must include goal, platform, inferred audience, tone execution, and a quoted key message/CTA.
+- **Angles (3)**: Platform‑specific ideas as plain strings formatted “Title — 1–2 sentence description”. Tailored to platform (Reels/Carousels/Stories for Instagram; trends/sounds/challenges for TikTok; prompts/incentives for UGC).
+- **Criteria (3)**: Short, actionable strings covering audience demographics, aesthetic/tone alignment, and performance/platform metric.
+- **Strict output**: Returns one JSON object only: `brief` (string), `angles` (3 strings), `criteria` (3 strings). No markdown, no nested JSON.
 
 ## Guardrails Implemented
-- **Input validation** (`brief/validators.py`):
-  - Allowlists for `platform`, `goal`, `tone`.
-  - Brand required and basic profanity filter.
-- **Rate‑limiting**: `@django_ratelimit.decorators.ratelimit(key='ip', rate='10/m', block=True)`.
-- **Generation limits**: `num_predict=500`, `temperature=0.3` in the Ollama client.
-- **Server‑side validation** of parsed JSON, with safe fallbacks.
+- **Input validation** (`brief/validators.py`): allowlists for `platform`, `goal`, `tone`; brand required; basic profanity filter.
+- **Rate‑limiting** (`brief/views.py`): `@ratelimit(key='ip', rate='10/m', block=True)`.
+- **Strict prompting** (`brief/services/llm.py`): explicit JSON schema; plain‑string enforcement for angles/criteria; no markdown fences.
+- **Parsing hardening**:
+  - Backend: tolerant JSON extraction, schema clamping to 3 items.
+  - Frontend (`brief/static/js/app.js`): strips code fences, attempts JSON recovery, and normalizes display.
+- **CSRF**: standard Django CSRF cookie and header usage in AJAX.
 
 ## Metrics: Tokens and Latency
 - **Latency**: measured around the LLM call using `time.perf_counter()`; returned as `metrics.latency_ms`.
@@ -138,7 +142,7 @@ A minimal Django app that generates a short influencer campaign brief using a ho
   - Prompt design choices
   - Guardrails
   - How tokens/latency are measured
-  - Short Loom demo (< 1 minute) of the feature
+  - Short Loom demo (< 1 minute): https://www.loom.com/share/0927157d1c154456b6e7bb7d44b75f64
 - A live, public webpage URL to test the generator
 
 ## Quick Troubleshooting
