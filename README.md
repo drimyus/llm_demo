@@ -6,7 +6,7 @@ A minimal Django app that generates a short influencer campaign brief using a ho
 ![AI Brief Generator UI](docs/screenshot.png)
 
 ## Demo
-- Loom (under 1 minute): https://www.loom.com/share/0927157d1c154456b6e7bb7d44b75f64
+- Video: https://www.loom.com/share/0927157d1c154456b6e7bb7d44b75f64
 
 ## Tech Stack
 - **Backend**: Django 5
@@ -136,14 +136,6 @@ A minimal Django app that generates a short influencer campaign brief using a ho
    - Environment: set variables listed above
    - Reload and open your domain
 
-## Deliverables Checklist
-- Public GitHub repo link
-- README (this file) with:
-  - Prompt design choices
-  - Guardrails
-  - How tokens/latency are measured
-  - Short Loom demo (< 1 minute): https://www.loom.com/share/0927157d1c154456b6e7bb7d44b75f64
-- A live, public webpage URL to test the generator
 
 ## Quick Troubleshooting
 - **Port in use**: run server on `0.0.0.0:8001`.
