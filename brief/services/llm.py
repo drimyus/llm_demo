@@ -10,8 +10,10 @@ from groq import Groq
 
 SYSTEM_PROMPT = (
     "You are an assistant that writes concise, production-ready influencer campaign briefs. "
-    "Follow constraints: 4-6 sentences, short, actionable; then 3 numbered content angles; "
-    "then 3 bullet creator selection criteria. Avoid fluff; tailor to inputs."
+    "Constraints: 4-6 sentence brief; then provide exactly 3 content angles; then exactly 3 creator selection criteria. "
+    "Output strictly one JSON object with keys: brief (string), angles (array of 3 strings), criteria (array of 3 strings). "
+    "Angles and criteria elements must be plain strings only (no nested JSON/objects/arrays, no markdown, no backticks). "
+    "Avoid fluff; tailor to inputs."
 )
 
 
@@ -52,7 +54,16 @@ def generate_brief(brand: str, platform: str, goal: str, tone: str) -> BriefResu
         {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
-            "content": f"{build_user_prompt(brand, platform, goal, tone)}\n\nOnly output valid JSON with keys: brief, angles, criteria.",
+            "content": (
+                f"{build_user_prompt(brand, platform, goal, tone)}\n\n"
+                "Return exactly this JSON shape and nothing else (no markdown fences):\n"
+                "{\n"
+                "  \"brief\": \"<4-6 sentence paragraph>\",\n"
+                "  \"angles\": [\"<angle string>\", \"<angle string>\", \"<angle string>\"],\n"
+                "  \"criteria\": [\"<criteria string>\", \"<criteria string>\", \"<criteria string>\"]\n"
+                "}\n"
+                "Rules: elements of 'angles' and 'criteria' must be plain strings only (no JSON, no lists, no objects, no colons if avoidable)."
+            ),
         },
     ]
     resp = client.chat.completions.create(
