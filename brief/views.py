@@ -1,9 +1,11 @@
 import json
+import os
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render
+from django.conf import settings
 
 from .validators import validate_inputs
 from .services.llm import generate_brief
@@ -43,4 +45,5 @@ def generate_brief_endpoint(request):
 
 @ensure_csrf_cookie
 def home(request):
-    return render(request, 'index.html')
+    model_name = getattr(settings, 'GROQ_MODEL', os.getenv('GROQ_MODEL', 'llama-3.1-8b-instant'))
+    return render(request, 'index.html', {"model_name": model_name})

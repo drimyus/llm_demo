@@ -1,43 +1,48 @@
 # Collabstr AI Brief Generator
 
-A minimal Django app that generates a short influencer campaign brief using a local LLM via Ollama. It demonstrates clean orchestration, prompt design, guardrails, and basic telemetry, with a Collabstr‑adjacent single‑page UI.
+A minimal Django app that generates a short influencer campaign brief using a hosted LLM via Groq (configurable model). It demonstrates clean orchestration, prompt design, light guardrails, and telemetry, with a Collabstr‑adjacent single‑page UI.
 
 ## Screenshot
 ![AI Brief Generator UI](docs/screenshot.png)
 
 ## Tech Stack
-- **Backend**: Django 5, `django-ratelimit`, simple validators
-- **LLM**: `langchain-ollama` with an Ollama model (default: `phi3`)
+- **Backend**: Django 5
+- **LLM**: Groq API (`GROQ_MODEL` default: `llama-3.1-8b-instant`)
 - **Frontend**: HTML/CSS/JS + jQuery
 
 ## Project Structure
 - `collabstr_ai/` – Django project (settings, urls)
 - `brief/` – App with API endpoint, templates, and static assets
   - `views.py` – `generate_brief_endpoint()` and `home()`
-  - `services/llm.py` – Ollama LLM call and JSON parsing + latency metrics
+  - `services/llm.py` – Groq chat completion call and JSON parsing + latency metrics
   - `validators.py` – Input validation + profanity filter
   - `templates/index.html` – Single‑page UI
   - `static/js/app.js` – jQuery AJAX + rendering
   - `static/css/style.css` – Collabstr‑adjacent light theme (Inter font, gradient CTA)
 
-## Setup
-1. Install dependencies (uv recommended):
+## Setup (Local)
+1. Install dependencies (uv or pip):
    ```bash
+   # uv
    uv sync
+   # or pip
+   pip install -r requirements.txt
    ```
-  
-2. Ensure Ollama is installed and running, and pull your model if needed:
-   ```bash
-   ollama pull phi3
+
+2. Create `.env` (see `.example.env`) with at least:
+   ```env
+   GROQ_API_KEY=your_groq_key
+   GROQ_MODEL=llama-3.1-8b-instant
+   DEBUG=True
+   ALLOWED_HOSTS=127.0.0.1,localhost,0.0.0.0
+   CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8001,http://localhost:8001,http://0.0.0.0:8001
    ```
-3. Environment (optional; defaults shown):
-   - `OLLAMA_MODEL=phi3`
-   - `OLLAMA_BASE_URL=http://localhost:11434`
-4. Initialize DB and run:
+
+3. Initialize DB and run:
    ```bash
    uv run python manage.py migrate
-   uv run python manage.py runserver 0.0.0.0:8000
-   # If port 8000 is taken, use 8001
+   uv run python manage.py runserver 0.0.0.0:8001
+   # Open http://127.0.0.1:8001
    ```
 
 ## API
@@ -81,8 +86,8 @@ A minimal Django app that generates a short influencer campaign brief using a lo
 
 ## Metrics: Tokens and Latency
 - **Latency**: measured around the LLM call using `time.perf_counter()`; returned as `metrics.latency_ms`.
-- **Token usage**: Ollama via LangChain doesn’t consistently expose token counts; we return zeros to keep the shape stable.
-- **Frontend**: renders latency and (placeholder) token metrics in the result card.
+- **Token usage**: populated from Groq’s response (`prompt_tokens`, `completion_tokens`, `total_tokens`).
+- **Frontend**: renders latency and token metrics in the result card.
 
 ## Frontend Behavior
 - Single page (`/`) with 4 inputs and a Generate button.
@@ -99,9 +104,33 @@ A minimal Django app that generates a short influencer campaign brief using a lo
 - You can refine colors and spacing to match assets under `tmp/` if desired.
 
 ## Deploy
-- Any Django‑friendly host works (Render, Railway, Fly.io, a VM, etc.).
-- Set `DJANGO_SECRET_KEY` and `ALLOWED_HOSTS` appropriately.
-- Ensure the Ollama server is reachable from the app (or host it alongside the app).
+- Live demo: https://drimyus.pythonanywhere.com/
+- Host options: PythonAnywhere (free), Hugging Face Spaces (Docker), Render/Railway/Fly (credit card may be required).
+- Required env vars in production:
+  - `DJANGO_SETTINGS_MODULE=collabstr_ai.settings`
+  - `DEBUG=False`
+  - `ALLOWED_HOSTS=<your-domain>` and `CSRF_TRUSTED_ORIGINS=https://<your-domain>`
+  - `DJANGO_SECRET_KEY=<random-strong-secret>`
+  - `GROQ_API_KEY=<your_key>` and optional `GROQ_MODEL`
+
+### PythonAnywhere (summary)
+1. Bash console:
+   ```bash
+   git clone https://github.com/<you>/<repo>.git
+   cd <repo>
+   python3 -m venv ~/.virtualenvs/llm-demo
+   source ~/.virtualenvs/llm-demo/bin/activate
+   pip install -r requirements.txt
+   python manage.py collectstatic --noinput
+   python manage.py migrate
+   ```
+2. Web tab:
+   - Manual config (Python 3.x)
+   - Virtualenv: `~/.virtualenvs/llm-demo`
+   - WSGI: point to `collabstr_ai.wsgi`
+   - Static: map `/static/` → `/home/<you>/<repo>/staticfiles`
+   - Environment: set variables listed above
+   - Reload and open your domain
 
 ## Deliverables Checklist
 - Public GitHub repo link
@@ -113,6 +142,7 @@ A minimal Django app that generates a short influencer campaign brief using a lo
 - A live, public webpage URL to test the generator
 
 ## Quick Troubleshooting
-- Port in use: run server on `0.0.0.0:8001`.
-- CSRF errors: ensure you loaded `/` first so the CSRF cookie is set; AJAX sends `X‑CSRFToken`.
-- Ollama errors: confirm `ollama serve` is running and the model exists (`ollama pull phi3`).
+- **Port in use**: run server on `0.0.0.0:8001`.
+- **Bad Request (400)**: ensure `ALLOWED_HOSTS` includes your host and visit via `http://127.0.0.1:8001` in dev.
+- **CSRF errors**: ensure you loaded `/` first so the CSRF cookie is set; AJAX sends `X‑CSRFToken`.
+- **Groq errors**: check `GROQ_API_KEY` and network access.

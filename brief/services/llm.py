@@ -9,11 +9,12 @@ from groq import Groq
 
 
 SYSTEM_PROMPT = (
-    "You are an assistant that writes concise, production-ready influencer campaign briefs. "
-    "Constraints: 4-6 sentence brief; then provide exactly 3 content angles; then exactly 3 creator selection criteria. "
+    "You are an expert Marketing Strategist and Senior Copywriter. "
+    "Your task is to generate a concise, actionable, and creative campaign brief from four inputs. "
+    "If the brand name is not inherently obvious, infer a plausible product/service. "
+    "Avoid fluff; be professional and strategic. "
     "Output strictly one JSON object with keys: brief (string), angles (array of 3 strings), criteria (array of 3 strings). "
-    "Angles and criteria elements must be plain strings only (no nested JSON/objects/arrays, no markdown, no backticks). "
-    "Avoid fluff; tailor to inputs."
+    "Angles and criteria elements must be plain strings only (no nested JSON/objects/arrays, no markdown, no backticks)."
 )
 
 
@@ -56,13 +57,18 @@ def generate_brief(brand: str, platform: str, goal: str, tone: str) -> BriefResu
             "role": "user",
             "content": (
                 f"{build_user_prompt(brand, platform, goal, tone)}\n\n"
+                "Write the brief and lists following these constraints, but RETURN ONLY JSON with the exact shape below.\n"
+                "- brief: A single paragraph of 4-6 sentences. Start with: 'Here is the campaign brief for [Brand Name].'\n"
+                "  The paragraph must: clearly state the primary [Campaign Goal]; mention the [Target Platform]; infer and mention the target audience; explain how the [Brand Tone] is executed; and include a clear key message or CTA in quotes.\n"
+                "- angles: Exactly 3 platform-specific content ideas as short strings. Each string should be: '<Short bold-ish title> — <1-2 sentence description>'. Tailor to the [Target Platform] (e.g., Reels/Carousels/Stories for Instagram; trends/sounds/challenges for TikTok; specific prompts/incentives for UGC).\n"
+                "- criteria: Exactly 3 actionable creator selection bullets as short strings covering: audience demographics aligned to the inferred audience; aesthetic/tone aligned to [Brand Tone]; performance/platform metric aligned to [Campaign Goal] and [Target Platform].\n\n"
                 "Return exactly this JSON shape and nothing else (no markdown fences):\n"
                 "{\n"
-                "  \"brief\": \"<4-6 sentence paragraph>\",\n"
-                "  \"angles\": [\"<angle string>\", \"<angle string>\", \"<angle string>\"],\n"
-                "  \"criteria\": [\"<criteria string>\", \"<criteria string>\", \"<criteria string>\"]\n"
+                "  \"brief\": \"<4-6 sentence paragraph starting with the required intro>\",\n"
+                "  \"angles\": [\"<title — description>\", \"<title — description>\", \"<title — description>\"],\n"
+                "  \"criteria\": [\"<short criterion>\", \"<short criterion>\", \"<short criterion>\"]\n"
                 "}\n"
-                "Rules: elements of 'angles' and 'criteria' must be plain strings only (no JSON, no lists, no objects, no colons if avoidable)."
+                "Rules: elements of 'angles' and 'criteria' must be plain strings only (no JSON, no lists, no objects, no markdown/backticks)."
             ),
         },
     ]
